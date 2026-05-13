@@ -1,10 +1,10 @@
-name: "Cartos Release Trigger"
+name: "Anamap Release Trigger"
 description: "Send a high-context release signal into Anamap so Cartos can run release ownership and impact follow-up."
 author: "Anamap"
 
 branding:
-  icon: "send"
-  color: "blue"
+  icon: "map-pin"
+  color: "green"
 
 inputs:
   base-url:
