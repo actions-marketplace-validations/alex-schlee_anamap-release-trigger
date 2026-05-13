@@ -50,6 +50,71 @@ jobs:
 
 ---
 
+## Reusable Workflow
+
+This repository also exposes a reusable workflow at `.github/workflows/notify-anamap.yml` so other repositories can call a higher-level wrapper instead of wiring the action directly.
+
+```yaml
+name: Deploy and Notify Anamap
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    uses: alex-schlee/anamap-release-trigger/.github/workflows/notify-anamap.yml@v1
+    with:
+      company-id: ${{ vars.ANAMAP_COMPANY_ID }}
+      environment: prod
+      change-type: new_feature
+    secrets:
+      trigger-token: ${{ secrets.ANAMAP_RELEASE_TRIGGER_TOKEN }}
+```
+
+Use the reusable workflow when you want a simple, shared entry point. Use the action directly when you need the full low-level surface area or want to embed it in a larger job.
+
+---
+
+## Searchable Organization Template
+
+If you want the workflow to appear in GitHub's workflow template picker, publish a template from your organization's public `.github` repository under `.github/workflow-templates/`.
+
+Example template workflow file:
+
+```yaml
+name: Notify Anamap On Deploy
+
+on:
+  push:
+    branches: [$default-branch]
+  workflow_dispatch:
+
+jobs:
+  notify:
+    uses: alex-schlee/anamap-release-trigger/.github/workflows/notify-anamap.yml@v1
+    with:
+      company-id: ${{ vars.ANAMAP_COMPANY_ID }}
+      environment: prod
+    secrets:
+      trigger-token: ${{ secrets.ANAMAP_RELEASE_TRIGGER_TOKEN }}
+```
+
+Matching metadata file:
+
+```json
+{
+  "name": "Anamap Release Trigger",
+  "description": "Send deployment and release context to Anamap after a deploy.",
+  "iconName": "anamap-logo",
+  "categories": ["deployment", "automation"]
+}
+```
+
+To attach your company logo, place an SVG file named `anamap-logo.svg` in the same `workflow-templates` directory and set `iconName` to `anamap-logo`. GitHub also supports Octicons, but the SVG file path is the way to use your own brand asset.
+
+---
+
 ## Required Inputs
 
 | Input | Description |

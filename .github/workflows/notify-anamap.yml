@@ -1,0 +1,239 @@
+name: Notify Anamap
+
+on:
+  workflow_call:
+    inputs:
+      base-url:
+        description: Base URL for the Anamap API.
+        required: false
+        default: https://anamaps.com
+        type: string
+      company-id:
+        description: Your Anamap company ID.
+        required: true
+        type: string
+      event-mode:
+        description: How to determine the event type.
+        required: false
+        default: auto
+        type: string
+      environment:
+        description: Deployment environment name.
+        required: false
+        default: prod
+        type: string
+      change-type:
+        description: Type of change.
+        required: false
+        default: unknown
+        type: string
+      release-name:
+        description: Override the human-readable release name.
+        required: false
+        default: ''
+        type: string
+      description:
+        description: Override the release description.
+        required: false
+        default: ''
+        type: string
+      version:
+        description: Semantic version string for this release.
+        required: false
+        default: ''
+        type: string
+      tags:
+        description: Comma-separated list of tags to attach to the release event.
+        required: false
+        default: ''
+        type: string
+      event-id:
+        description: Override the deterministic event ID.
+        required: false
+        default: ''
+        type: string
+      compare-base:
+        description: Base commit SHA or ref for the compare range.
+        required: false
+        default: ''
+        type: string
+      compare-head:
+        description: Head commit SHA or ref for the compare range.
+        required: false
+        default: ''
+        type: string
+      metadata-json:
+        description: Extra metadata as a JSON string to merge into the metadata object.
+        required: false
+        default: ''
+        type: string
+      include-release-notes:
+        description: Include release notes in the payload when available.
+        required: false
+        default: true
+        type: boolean
+      include-changed-files:
+        description: Include changed file inventory in the payload.
+        required: false
+        default: true
+        type: boolean
+      include-diff-stats:
+        description: Include diff statistics in the payload.
+        required: false
+        default: true
+        type: boolean
+      include-pr-context:
+        description: Include pull request context when a merged PR is associated with the commit.
+        required: false
+        default: true
+        type: boolean
+      include-deployment-context:
+        description: Include GitHub deployment context when available.
+        required: false
+        default: true
+        type: boolean
+      include-path-impact-summary:
+        description: Compute a deterministic path-based impact summary.
+        required: false
+        default: true
+        type: boolean
+      include-llm-analysis:
+        description: Enable V2 LLM-assisted semantic analysis.
+        required: false
+        default: false
+        type: boolean
+      llm-provider:
+        description: LLM provider to use.
+        required: false
+        default: disabled
+        type: string
+      llm-model:
+        description: Model identifier for the chosen LLM provider.
+        required: false
+        default: ''
+        type: string
+      llm-max-files:
+        description: Maximum number of files to include in the LLM retrieval context.
+        required: false
+        default: 40
+        type: number
+      llm-max-file-chars:
+        description: Maximum characters of content to include per file in the LLM context.
+        required: false
+        default: 12000
+        type: number
+      llm-max-patch-chars:
+        description: Maximum total characters of patch content to include in the LLM context.
+        required: false
+        default: 40000
+        type: number
+      max-changed-files:
+        description: Maximum number of changed files to include in the payload.
+        required: false
+        default: 300
+        type: number
+      max-file-list-chars:
+        description: Maximum total characters for the changed file list.
+        required: false
+        default: 20000
+        type: number
+      fail-on-duplicate:
+        description: Fail the workflow if Anamap returns 409 Conflict.
+        required: false
+        default: false
+        type: boolean
+      dry-run:
+        description: Build the payload but do not POST it to Anamap.
+        required: false
+        default: false
+        type: boolean
+      debug:
+        description: Enable verbose debug logging.
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      trigger-token:
+        description: Anamap release trigger token.
+        required: true
+      openai-api-key:
+        description: Optional OpenAI API key when llm-provider is openai.
+        required: false
+    outputs:
+      accepted:
+        description: Whether Anamap accepted the release event.
+        value: ${{ jobs.notify.outputs.accepted }}
+      status-code:
+        description: HTTP status code returned by Anamap.
+        value: ${{ jobs.notify.outputs.status-code }}
+      duplicate:
+        description: Whether Anamap reported this as a duplicate event.
+        value: ${{ jobs.notify.outputs.duplicate }}
+      question-id:
+        description: The Anamap question ID created for this release.
+        value: ${{ jobs.notify.outputs.question-id }}
+      investigate-by:
+        description: When Cartos will run the first release investigation.
+        value: ${{ jobs.notify.outputs.investigate-by }}
+      normalized-event-id:
+        description: The deterministic or overridden event ID that was sent.
+        value: ${{ jobs.notify.outputs.normalized-event-id }}
+
+jobs:
+  notify:
+    name: Notify Anamap
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      deployments: read
+      pull-requests: read
+    outputs:
+      accepted: ${{ steps.anamap.outputs.accepted }}
+      status-code: ${{ steps.anamap.outputs.status-code }}
+      duplicate: ${{ steps.anamap.outputs.duplicate }}
+      question-id: ${{ steps.anamap.outputs.question-id }}
+      investigate-by: ${{ steps.anamap.outputs.investigate-by }}
+      normalized-event-id: ${{ steps.anamap.outputs.normalized-event-id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Notify Anamap
+        id: anamap
+        uses: alex-schlee/anamap-release-trigger@v1
+        with:
+          base-url: ${{ inputs.base-url }}
+          company-id: ${{ inputs.company-id }}
+          trigger-token: ${{ secrets.trigger-token }}
+          event-mode: ${{ inputs.event-mode }}
+          environment: ${{ inputs.environment }}
+          change-type: ${{ inputs.change-type }}
+          release-name: ${{ inputs.release-name }}
+          description: ${{ inputs.description }}
+          version: ${{ inputs.version }}
+          tags: ${{ inputs.tags }}
+          event-id: ${{ inputs.event-id }}
+          compare-base: ${{ inputs.compare-base }}
+          compare-head: ${{ inputs.compare-head }}
+          metadata-json: ${{ inputs.metadata-json }}
+          include-release-notes: ${{ inputs.include-release-notes }}
+          include-changed-files: ${{ inputs.include-changed-files }}
+          include-diff-stats: ${{ inputs.include-diff-stats }}
+          include-pr-context: ${{ inputs.include-pr-context }}
+          include-deployment-context: ${{ inputs.include-deployment-context }}
+          include-path-impact-summary: ${{ inputs.include-path-impact-summary }}
+          include-llm-analysis: ${{ inputs.include-llm-analysis }}
+          llm-provider: ${{ inputs.llm-provider }}
+          llm-model: ${{ inputs.llm-model }}
+          llm-max-files: ${{ inputs.llm-max-files }}
+          llm-max-file-chars: ${{ inputs.llm-max-file-chars }}
+          llm-max-patch-chars: ${{ inputs.llm-max-patch-chars }}
+          max-changed-files: ${{ inputs.max-changed-files }}
+          max-file-list-chars: ${{ inputs.max-file-list-chars }}
+          fail-on-duplicate: ${{ inputs.fail-on-duplicate }}
+          dry-run: ${{ inputs.dry-run }}
+          debug: ${{ inputs.debug }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.openai-api-key }}
