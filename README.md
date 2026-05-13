@@ -1,4 +1,6 @@
-# Cartos Release Trigger Action
+![Anamap Release Trigger logo](https://github.com/user-attachments/assets/5a0769a9-a452-4d5a-9736-20930734df04)
+
+# Anamap Release Trigger Action
 
 A GitHub Action that sends a high-context release signal into [Anamap](https://anamaps.com) so Cartos — Anamap's AI release analyst — can run release ownership attribution and impact follow-up.
 
@@ -36,7 +38,7 @@ jobs:
       - name: Deploy your application
         run: ./deploy.sh
 
-      - name: Notify Cartos
+      - name: Notify Anamap
         if: success()
         uses: alex-schlee/anamap-release-trigger@v1
         with:
@@ -144,14 +146,14 @@ jobs:
 ### Using Outputs
 
 ```yaml
-- name: Notify Cartos
+- name: Notify Anamap
   id: cartos
   uses: alex-schlee/anamap-release-trigger@v1
   with:
     company-id: ${{ vars.ANAMAP_COMPANY_ID }}
     trigger-token: ${{ secrets.ANAMAP_RELEASE_TRIGGER_TOKEN }}
 
-- name: Log Cartos result
+- name: Log Anamap result
   run: |
     echo "Event ID: ${{ steps.cartos.outputs.normalized-event-id }}"
     echo "Question: ${{ steps.cartos.outputs.question-id }}"
@@ -165,7 +167,7 @@ jobs:
 ### Standard Deploy Notification
 
 ```yaml
-name: Deploy and Notify Cartos
+name: Deploy and Notify Anamap
 
 on:
   push:
@@ -183,7 +185,7 @@ jobs:
       - name: Deploy
         run: ./deploy.sh
 
-      - name: Notify Cartos
+      - name: Notify Anamap
         if: success()
         uses: alex-schlee/anamap-release-trigger@v1
         with:
@@ -198,7 +200,7 @@ jobs:
 ### Release Event
 
 ```yaml
-name: Notify Cartos on Release
+name: Notify Anamap on Release
 
 on:
   release:
@@ -212,7 +214,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Notify Cartos
+      - name: Notify Anamap
         uses: alex-schlee/anamap-release-trigger@v1
         with:
           company-id: ${{ vars.ANAMAP_COMPANY_ID }}
@@ -225,7 +227,7 @@ jobs:
 ### With LLM Analysis (V2)
 
 ```yaml
-- name: Notify Cartos with LLM
+- name: Notify Anamap with LLM
   uses: alex-schlee/anamap-release-trigger@v1
   with:
     company-id: ${{ vars.ANAMAP_COMPANY_ID }}
