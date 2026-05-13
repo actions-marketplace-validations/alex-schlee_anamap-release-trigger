@@ -1,0 +1,9 @@
+node_modules/
+# Commit dist/index.js and dist/licenses.txt but ignore TypeScript declaration artifacts
+dist/*.d.ts
+dist/*.d.ts.map
+dist/llm/
+coverage/
+.env
+.env.local
+*.log

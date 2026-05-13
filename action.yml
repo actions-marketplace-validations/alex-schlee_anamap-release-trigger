@@ -1,0 +1,161 @@
+name: "Cartos Release Trigger"
+description: "Send a high-context release signal into Anamap so Cartos can run release ownership and impact follow-up."
+author: "Anamap"
+
+branding:
+  icon: "send"
+  color: "blue"
+
+inputs:
+  base-url:
+    description: "Base URL for the Anamap API."
+    required: false
+    default: "https://anamaps.com"
+  company-id:
+    description: "Your Anamap company ID (UUID)."
+    required: true
+  trigger-token:
+    description: "Anamap release trigger token. Store as a repository secret."
+    required: true
+  github-token:
+    description: "GitHub token used to call the GitHub API for context enrichment."
+    required: false
+    default: "${{ github.token }}"
+  event-mode:
+    description: "How to determine the event type. One of: auto, release, deployment, workflow_run, manual."
+    required: false
+    default: "auto"
+  environment:
+    description: "Deployment environment name (e.g. prod, staging)."
+    required: false
+    default: "prod"
+  change-type:
+    description: "Type of change. One of: bug_fix, new_feature, hotfix, chore, unknown."
+    required: false
+    default: "unknown"
+  release-name:
+    description: "Override the human-readable release name."
+    required: false
+    default: ""
+  description:
+    description: "Override the release description."
+    required: false
+    default: ""
+  version:
+    description: "Semantic version string for this release."
+    required: false
+    default: ""
+  tags:
+    description: "Comma-separated list of tags to attach to the release event."
+    required: false
+    default: ""
+  event-id:
+    description: "Override the deterministic event ID."
+    required: false
+    default: ""
+  compare-base:
+    description: "Base commit SHA or ref for the compare range."
+    required: false
+    default: ""
+  compare-head:
+    description: "Head commit SHA or ref for the compare range."
+    required: false
+    default: ""
+  metadata-json:
+    description: "Extra metadata as a JSON string to merge into the metadata object."
+    required: false
+    default: ""
+  include-release-notes:
+    description: "Include release notes in the payload when available."
+    required: false
+    default: "true"
+  include-changed-files:
+    description: "Include changed file inventory in the payload."
+    required: false
+    default: "true"
+  include-diff-stats:
+    description: "Include diff statistics (additions, deletions) in the payload."
+    required: false
+    default: "true"
+  include-pr-context:
+    description: "Include pull request context when a merged PR is associated with the commit."
+    required: false
+    default: "true"
+  include-deployment-context:
+    description: "Include GitHub deployment context when available."
+    required: false
+    default: "true"
+  include-path-impact-summary:
+    description: "Compute a deterministic path-based impact summary."
+    required: false
+    default: "true"
+  include-llm-analysis:
+    description: "Enable V2 LLM-assisted semantic analysis."
+    required: false
+    default: "false"
+  llm-provider:
+    description: "LLM provider to use. One of: github-models, openai, disabled."
+    required: false
+    default: "disabled"
+  llm-model:
+    description: "Model identifier for the chosen LLM provider."
+    required: false
+    default: ""
+  llm-max-files:
+    description: "Maximum number of files to include in the LLM retrieval context."
+    required: false
+    default: "40"
+  llm-max-file-chars:
+    description: "Maximum characters of content to include per file in the LLM context."
+    required: false
+    default: "12000"
+  llm-max-patch-chars:
+    description: "Maximum total characters of patch content to include in the LLM context."
+    required: false
+    default: "40000"
+  max-changed-files:
+    description: "Maximum number of changed files to include in the payload."
+    required: false
+    default: "300"
+  max-file-list-chars:
+    description: "Maximum total characters for the changed file list."
+    required: false
+    default: "20000"
+  fail-on-duplicate:
+    description: "Fail the action if Anamap returns 409 Conflict (duplicate event)."
+    required: false
+    default: "false"
+  dry-run:
+    description: "When true, build the payload but do not POST it to Anamap."
+    required: false
+    default: "false"
+  debug:
+    description: "Enable verbose debug logging."
+    required: false
+    default: "false"
+
+outputs:
+  accepted:
+    description: "Whether Anamap accepted the release event (true/false)."
+  status-code:
+    description: "HTTP status code returned by Anamap."
+  duplicate:
+    description: "Whether Anamap reported this as a duplicate event (true/false)."
+  question-id:
+    description: "The Anamap question ID created for this release, if returned."
+  investigate-by:
+    description: "ISO timestamp when Cartos will run the first release investigation."
+  scheduled-run-id:
+    description: "Anamap scheduled run ID for the deferred investigation, if returned."
+  normalized-event-id:
+    description: "The deterministic or overridden event ID that was sent."
+  payload-bytes:
+    description: "Size in bytes of the JSON payload that was sent."
+  request-url:
+    description: "The full URL the payload was (or would be) POSTed to."
+  llm-analysis-included:
+    description: "Whether LLM-generated analysis was included in the payload."
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
