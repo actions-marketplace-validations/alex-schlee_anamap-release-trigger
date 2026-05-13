@@ -1,0 +1,36 @@
+{
+  "name": "anamap-release-trigger",
+  "version": "1.0.0",
+  "description": "GitHub Action that sends a high-context release signal into Anamap so Cartos can run release ownership and impact follow-up.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.ts --license licenses.txt",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "github-action",
+    "anamap",
+    "cartos",
+    "release",
+    "deployment"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.50",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vercel/ncc": "^0.38.3",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.4",
+    "typescript": "^5.8.3"
+  }
+}
